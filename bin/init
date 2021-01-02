@@ -1,0 +1,63 @@
+#!/bin/sh
+
+# @NOTE Instructions
+# * Make sure this is run as `source bin/init` so that environment variables are properly exported
+
+############
+#  Config  #
+############
+
+DEFAULT_PYTHON3='/usr/bin/python3'
+[[ -z "${PYTHON3}" ]] && PYTHON3="${DEFAULT_PYTHON3}" || PYTHON3="${PYTHON3}"
+
+
+# Set DEFAULT_APP_DIR to your local git directory (or export it as APP_DIR in your .bash_profile)
+DEFAULT_DEMO_DIR="/home/justin/Code/CanIRollThere"
+[[ -z "${DEMO_DIR}" ]] && DEMO_DIR="${DEFAULT_DEMO_DIR}" || DEMO_DIR="${DEMO_DIR}"
+export DEMO_DIR
+
+
+#############
+#  Content  #
+#############
+
+cd $DEMO_DIR
+
+# install pip3
+if ! command -v pip3 &>> /dev/null;
+then
+    echo "installing pip..."
+    curl -X GET https://bootstrap.pypa.io/get-pip.py > get-pip.py
+    eval "$PYTHON3 get-pip.py"
+    rm get-pip.py
+fi
+
+# We only want to be using pip3
+alias pip="pip3"
+
+# install virtualenv
+if ! command -v virtualenv &>> /dev/null;
+then
+    echo "installing virtualenv..."
+    pip3 install virtualenv
+fi
+
+if [[ ! -d .venv ]];
+then
+    echo "creating virtual environment..."
+    eval "virtualenv -p $PYTHON3 .venv"
+fi
+
+# shorter activation of virtual environment
+activate() {
+    source $DEMO_DIR/.venv/bin/activate
+}
+export activate
+
+# Activate the virtual environment
+echo "activating virtual environment..."
+eval "source .venv/bin/activate"
+
+# install dependencies
+echo "installing dependencies..."
+pip install -r requirements.txt
