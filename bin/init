@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # @NOTE Instructions
-# * Make sure this is run as `source bin/init` so that environment variables are properly exported
+# * Make sure this is run as `source back/bin/init` so that environment variables are properly exported
 
 ############
 #  Config  #
@@ -12,7 +12,7 @@ DEFAULT_PYTHON3='/usr/bin/python3'
 
 
 # Set DEFAULT_APP_DIR to your local git directory (or export it as APP_DIR in your .bash_profile)
-DEFAULT_DEMO_DIR="/home/justin/Code/CanIRollThere"
+DEFAULT_DEMO_DIR="/home/justin/Code/CanIRollThere/"
 [[ -z "${DEMO_DIR}" ]] && DEMO_DIR="${DEFAULT_DEMO_DIR}" || DEMO_DIR="${DEMO_DIR}"
 export DEMO_DIR
 
@@ -24,7 +24,7 @@ export DEMO_DIR
 cd $DEMO_DIR
 
 # install pip3
-if ! command -v pip3 &>> /dev/null;
+if ! command -v pip3 &> /dev/null;
 then
     echo "installing pip..."
     curl -X GET https://bootstrap.pypa.io/get-pip.py > get-pip.py
@@ -36,7 +36,7 @@ fi
 alias pip="pip3"
 
 # install virtualenv
-if ! command -v virtualenv &>> /dev/null;
+if ! command -v virtualenv &> /dev/null;
 then
     echo "installing virtualenv..."
     pip3 install virtualenv
