@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# this will work if you've run bin/init... might have to change this for a prod build
+cd $DEMO_DIR
+
+mkdir build
+
+# copy flask app into build dir
+cp -r back/* build
+
+# build front end code into flask app
+cd front
+ng build --prod --output-path "../build/flask_app/web"
