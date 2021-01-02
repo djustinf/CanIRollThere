@@ -124,5 +124,8 @@
       }
     }
   },
-  "defaultProject": "CanIRollThere"
+  "defaultProject": "CanIRollThere",
+  "cli": {
+    "analytics": false
+  }
 }

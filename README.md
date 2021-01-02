@@ -5,3 +5,5 @@
 * ```make build``` to build the application
 * ```make clean``` to clean up the build dir
 * ```make run``` to run the application
+* ```make serve``` to launch a front end dev server which rebuilds on file changes
+* ```make install``` to install front end libraries

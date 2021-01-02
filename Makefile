@@ -1,8 +1,14 @@
-build:
-	bin/build
-
 clean:
 	rm -rf build
 
-run:
+install:
+	bin/install
+
+serve:
+	bin/serve
+
+build: clean
+	bin/build
+
+run: build
 	python3 build/run.py

@@ -1,1 +1,37 @@
-/* You can add global styles to this file, and also import other style files */
+@import "~leaflet/dist/leaflet.css";
+
+* {
+    font-family: Roboto;
+}
+
+body {
+    margin: 0;
+}
+
+a {
+    text-decoration: none;
+}
+
+app-top-bar {
+    height: 50px;
+    width: 100%;
+    padding: 10px;
+
+    background-color: black;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+app-bottom-bar {
+    height: 50px;
+    width: 100%;
+    padding: 0 10px 0 10px;
+
+    background-color: black;
+
+    position: fixed;
+    bottom: 0;
+    align-items: center;
+}
