@@ -8,6 +8,14 @@ import { CoordinateService } from '../coordinate.service';
   styleUrls: ['./interactive-map.component.css']
 })
 export class InteractiveMapComponent implements AfterViewInit {
+  // https://github.com/Asymmetrik/ngx-leaflet/issues/175#issuecomment-406873836
+  readonly MARKER_ICON: L.Icon = L.icon({
+    iconSize: [ 25, 41 ],
+    iconAnchor: [ 13, 41 ],
+    iconUrl: 'leaflet/marker-icon.png',
+    shadowUrl: 'leaflet/marker-shadow.png'
+  });
+
   private map!: L.Map;
   private markers!: L.Marker[];
   private lines!: L.Polyline[];
@@ -51,7 +59,7 @@ export class InteractiveMapComponent implements AfterViewInit {
   }
 
   private addMarker(event: L.LeafletMouseEvent): void {
-    var marker = L.marker(event.latlng);
+    var marker = L.marker(event.latlng, {icon: this.MARKER_ICON});
     this.markers.push(marker);
 
     if (this.markers.length > 1) {
