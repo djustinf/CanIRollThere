@@ -1,5 +1,6 @@
 import { Component, AfterViewInit } from '@angular/core';
 import * as L from 'leaflet';
+import { CoordinateService } from '../coordinate.service';
 
 @Component({
   selector: 'app-interactive-map',
@@ -8,8 +9,17 @@ import * as L from 'leaflet';
 })
 export class InteractiveMapComponent implements AfterViewInit {
   private map!: L.Map;
+  private markers!: L.Marker[];
+  private lines!: L.Polyline[];
+  coordinateService!: CoordinateService;
 
-  constructor() { }
+  constructor(
+    coordinateService: CoordinateService,
+  ) {
+    this.coordinateService = coordinateService;
+    this.markers = [];
+    this.lines = [];
+  }
 
   ngAfterViewInit(): void {
     navigator.geolocation.getCurrentPosition(this.initMap.bind(this), (e) => {
@@ -31,10 +41,39 @@ export class InteractiveMapComponent implements AfterViewInit {
       });
     }
 
+    this.map.on('click', this.addMarker.bind(this) as L.LeafletEventHandlerFn);
+
     const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     });
 
     tiles.addTo(this.map);
+  }
+
+  private addMarker(event: L.LeafletMouseEvent): void {
+    var marker = L.marker(event.latlng);
+    this.markers.push(marker);
+
+    if (this.markers.length > 1) {
+      var polyline = L.polyline([marker.getLatLng(), this.markers[this.markers.length - 2].getLatLng()]);
+      this.lines.push(polyline);
+      polyline.addTo(this.map);
+    }
+
+    marker.addTo(this.map);
+    this.coordinateService.addPoint(event.latlng.lat, event.latlng.lng);
+  }
+
+  clearMarkers() {
+    for (let marker of this.markers) {
+      marker.remove();
+    }
+    this.markers = [];
+
+    for (let line of this.lines) {
+      line.remove();
+    }
+    this.lines = [];
+    this.coordinateService.clearPoints();
   }
 }
