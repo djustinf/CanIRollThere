@@ -1,4 +1,5 @@
 # Version-specific #
+requests==2.25.1
 
 # Wild wild west #
 flask

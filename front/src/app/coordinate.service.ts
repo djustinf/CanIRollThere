@@ -7,7 +7,7 @@ import { Waypoint } from './waypoint';
 })
 export class CoordinateService {
   // TODO: Move to a better pattern once we have more API calls and this is being hosted
-  private ELEVATION_API = 'http://127.0.0.1:5000/elevation';
+  private ELEVATION_API = 'http://localhost:5000/elevation';
   private points: Waypoint[];
 
   constructor(

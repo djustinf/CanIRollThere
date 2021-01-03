@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# this will work if you've run bin/init... might have to change this for a prod build
-cd $DEMO_DIR
-
 mkdir build
 
 # copy flask app into build dir

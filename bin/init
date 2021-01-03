@@ -10,18 +10,9 @@
 DEFAULT_PYTHON3='/usr/bin/python3'
 [[ -z "${PYTHON3}" ]] && PYTHON3="${DEFAULT_PYTHON3}" || PYTHON3="${PYTHON3}"
 
-
-# Set DEFAULT_APP_DIR to your local git directory (or export it as APP_DIR in your .bash_profile)
-DEFAULT_DEMO_DIR="/home/justin/Code/CanIRollThere/"
-[[ -z "${DEMO_DIR}" ]] && DEMO_DIR="${DEFAULT_DEMO_DIR}" || DEMO_DIR="${DEMO_DIR}"
-export DEMO_DIR
-
-
 #############
 #  Content  #
 #############
-
-cd $DEMO_DIR
 
 # install pip3
 if ! command -v pip3 &> /dev/null;
@@ -50,7 +41,7 @@ fi
 
 # shorter activation of virtual environment
 activate() {
-    source $DEMO_DIR/.venv/bin/activate
+    source .venv/bin/activate
 }
 export activate
 
