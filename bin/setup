@@ -1,0 +1,29 @@
+#!/bin/bash
+
+DATA_DIR=$(pwd)/data
+
+# create data directory
+ls $DATA_DIR &> /dev/null
+if [ $? == 0 ];
+then
+   echo "found '$DATA_DIR'"
+else
+   echo "creating '$DATA_DIR', please load elevation data"
+   mkdir $DATA_DIR
+   exit
+fi
+
+# install open-elevation
+if command -v docker &> /dev/null;
+then
+   echo "found docker"
+   echo "pulling openelevation/open-elevation image"
+   docker pull openelevation/open-elevation
+   echo "starting openelevation/open-elevation with '$(pwd)/data' directory"
+   docker run -d -t -i -v $DATA_DIR:/code/data -p 8080:8080 openelevation/open-elevation
+   echo "started container at http://localhost:8080"
+else
+   echo "could not find docker, please install"
+   exit
+fi
+

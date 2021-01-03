@@ -1,6 +1,9 @@
 clean:
 	rm -rf build
 
+setup: install
+	bin/setup
+
 install:
 	bin/install
 
