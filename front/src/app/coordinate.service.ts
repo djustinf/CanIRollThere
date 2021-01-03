@@ -1,21 +1,29 @@
 import { Injectable } from '@angular/core';
-import { Point } from 'leaflet';
+import { HttpClient } from '@angular/common/http';
+import { Waypoint } from './waypoint';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CoordinateService {
-  private points: Point[];
+  // TODO: Move to a better pattern once we have more API calls and this is being hosted
+  private ELEVATION_API = 'http://127.0.0.1:5000/elevation';
+  private points: Waypoint[];
 
-  constructor() { 
+  constructor(
+    private httpClient: HttpClient,
+  ) {
     this.points = [];
   }
 
-  addPoint(x: number, y: number) {
-    this.points.push(new Point(x, y));
+  addPoint(x: number, y: number): void {
+    this.httpClient.get<string>(this.ELEVATION_API, { params: { lat: x.toString(), lon: y.toString() } })
+      .subscribe((elev: string) => {
+        this.points.push(new Waypoint(x, y, +elev));
+      });
   }
 
-  getPoints(): Point[] {
+  getPoints(): Waypoint[] {
     return this.points;
   }
 
