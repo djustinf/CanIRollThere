@@ -7,32 +7,34 @@ import * as L from 'leaflet';
   styleUrls: ['./interactive-map.component.css']
 })
 export class InteractiveMapComponent implements AfterViewInit {
-  private lat!: number;
-  private lon!: number;
   private map!: L.Map;
 
   constructor() { }
 
   ngAfterViewInit(): void {
-    this.initMap();
+    navigator.geolocation.getCurrentPosition(this.initMap.bind(this), (e) => {
+      console.warn("Failed to get current location.");
+      this.initMap();
+    })
   }
 
-  private initMap(): void {
-    navigator.geolocation.getCurrentPosition((position) => {
-      console.log(position);
-      this.lat = position.coords.latitude;
-      this.lon = position.coords.longitude;
-
+  private initMap(position?: Position): void {
+    if (position) {
       this.map = L.map('map', {
-        center: [ this.lat, this.lon ],
+        center: [ position.coords.latitude, position.coords.longitude ],
         zoom: 20
       });
-
-      const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    } else { // browser didn't provide position
+      this.map = L.map('map', {
+        center: [ 38.5766, -121.4932 ],
+        zoom: 20
       });
+    }
 
-      tiles.addTo(this.map);
+    const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     });
+
+    tiles.addTo(this.map);
   }
 }
