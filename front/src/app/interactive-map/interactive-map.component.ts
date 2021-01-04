@@ -56,6 +56,14 @@ export class InteractiveMapComponent implements AfterViewInit {
     });
 
     tiles.addTo(this.map);
+
+    // prevent button clicks from also clicking map,
+    // and make button visible when map is visible
+    const button = document.getElementById('remove-markers');
+    if (button) {
+      button.removeAttribute('hidden');
+      L.DomEvent.disableClickPropagation(button);
+    }
   }
 
   private addMarker(event: L.LeafletMouseEvent): void {

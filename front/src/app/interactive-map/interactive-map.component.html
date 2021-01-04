@@ -1,9 +1,5 @@
-<div class="map-container">
-    <div class="map-frame">
-        <div id="map"></div>
-    </div>
-
-    <button (click)="clearMarkers()">
+<div id="map">
+    <button id="remove-markers" hidden (click)="clearMarkers()" class="leaflet-top leaflet-right">
         Remove Markers
     </button>
 </div>

@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { CoordinateService } from '../coordinate.service';
-import { Waypoint } from '../waypoint';
 import { WaypointUpdate, UpdateType } from '../waypoint-update';
 
 @Component({
@@ -16,7 +15,7 @@ export class TopoGraphComponent implements OnInit, OnDestroy {
 
   // options
   legend: boolean = false;
-  showLabels: boolean = true;
+  showLabels: boolean = false;
   animations: boolean = true;
   xAxis: boolean = true;
   yAxis: boolean = true;
@@ -24,7 +23,8 @@ export class TopoGraphComponent implements OnInit, OnDestroy {
   showXAxisLabel: boolean = true;
   xAxisLabel: string = 'Waypoints';
   yAxisLabel: string = 'Elevation';
-  timeline: boolean = true;
+  timeline: boolean = false;
+  autoScale: boolean = true;
   colorScheme = {
     // color matches map waypoints
     domain: ['#3388FF']
