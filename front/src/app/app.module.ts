@@ -10,6 +10,7 @@ import { TopBarComponent } from './top-bar/top-bar.component';
 import { BottomBarComponent } from './bottom-bar/bottom-bar.component';
 import { InteractiveMapComponent } from './interactive-map/interactive-map.component';
 import { TopoGraphComponent } from './topo-graph/topo-graph.component';
+import { DifficultyComponent } from './difficulty/difficulty.component';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,8 @@ import { TopoGraphComponent } from './topo-graph/topo-graph.component';
     TopBarComponent,
     BottomBarComponent,
     InteractiveMapComponent,
-    TopoGraphComponent
+    TopoGraphComponent,
+    DifficultyComponent
   ],
   imports: [
     BrowserModule,

@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { CoordinateService } from '../coordinate.service';
 import { WaypointUpdate, UpdateType } from '../waypoint-update';
+import { Waypoint } from '../waypoint';
 
 @Component({
   selector: 'app-topo-graph',
@@ -11,6 +12,8 @@ import { WaypointUpdate, UpdateType } from '../waypoint-update';
 export class TopoGraphComponent implements OnInit, OnDestroy {
   coordinateService: CoordinateService;
   data: any[];
+  cumulativeDist: number;
+  lastWaypoint?: Waypoint;
   waypointSub!: Subscription;
 
   // options
@@ -21,8 +24,8 @@ export class TopoGraphComponent implements OnInit, OnDestroy {
   yAxis: boolean = true;
   showYAxisLabel: boolean = true;
   showXAxisLabel: boolean = true;
-  xAxisLabel: string = 'Waypoints';
-  yAxisLabel: string = 'Elevation';
+  xAxisLabel: string = 'Distance (km)';
+  yAxisLabel: string = 'Elevation (m)';
   timeline: boolean = false;
   autoScale: boolean = true;
   colorScheme = {
@@ -35,6 +38,7 @@ export class TopoGraphComponent implements OnInit, OnDestroy {
   ) {
     this.coordinateService = coordinateService;
     this.data = [{ name: 'Elevation', series: [] }];
+    this.cumulativeDist = 0;
   }
 
   ngOnInit(): void {
@@ -43,14 +47,20 @@ export class TopoGraphComponent implements OnInit, OnDestroy {
         case UpdateType.ADD:
           const waypoint = waypointUpdate.waypoint;
           if (waypoint) {
-            this.data[0].series = [...this.data[0].series, ...[{ name: `${waypoint.lat},${waypoint.lon}`, value: waypoint.elev }]];
+            if (this.lastWaypoint) {
+              this.cumulativeDist += waypoint.distanceToWaypoint(this.lastWaypoint);
+            }
+            this.data[0].series = [...this.data[0].series, ...[{ name: this.cumulativeDist, value: waypoint.elev }]];
             this.data = [...this.data];
+            this.lastWaypoint = waypoint;
           } else {
             console.warn('Topo graph was sent an undefined waypoint...');
           }
           break;
         case UpdateType.CLEAR:
           this.data = [{ name: 'Elevation', series: [] }];
+          this.lastWaypoint = undefined;
+          this.cumulativeDist = 0;
           break;
         case UpdateType.REMOVE:
           console.log('Topo graph can\'t remove waypoints yet.');

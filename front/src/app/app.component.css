@@ -7,13 +7,29 @@ div.flex-container {
     height: 90vh;
 }
 
+div.flex-column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    width: 50%;
+    height: 100%
+}
+
 app-interactive-map {
     width: 50%;
     height: 100%;
 }
 
+app-difficulty {
+    width: 100%;
+    height: 33%;
+    padding: 10px;
+}
+
 app-topo-graph {
-    width: 50%;
+    width: 100%;
     height: 33%;
     padding: 10px;
 }
