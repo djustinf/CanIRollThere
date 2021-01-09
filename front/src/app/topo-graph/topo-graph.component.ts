@@ -48,9 +48,9 @@ export class TopoGraphComponent implements OnInit, OnDestroy {
           const waypoint = waypointUpdate.waypoint;
           if (waypoint) {
             if (this.lastWaypoint) {
-              this.cumulativeDist += waypoint.distanceToWaypoint(this.lastWaypoint);
+              this.cumulativeDist += waypoint.distanceTo(this.lastWaypoint);
             }
-            this.data[0].series = [...this.data[0].series, ...[{ name: this.cumulativeDist, value: waypoint.elev }]];
+            this.data[0].series = [...this.data[0].series, ...[{ name: this.cumulativeDist, value: waypoint.alt }]];
             this.data = [...this.data];
             this.lastWaypoint = waypoint;
           } else {

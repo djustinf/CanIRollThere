@@ -12,3 +12,8 @@ body {
 a {
     text-decoration: none;
 }
+
+/* https://github.com/perliedman/leaflet-routing-machine/issues/20 */
+.leaflet-control-container .leaflet-routing-container-hide {
+    display: none;
+}

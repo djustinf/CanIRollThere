@@ -1,5 +1,6 @@
 import { Component, AfterViewInit } from '@angular/core';
 import * as L from 'leaflet';
+import 'leaflet-routing-machine';
 import { CoordinateService } from '../coordinate.service';
 
 @Component({
@@ -17,9 +18,10 @@ export class InteractiveMapComponent implements AfterViewInit {
   });
 
   private map!: L.Map;
-  private markers!: L.Marker[];
-  private lines!: L.Polyline[];
-  coordinateService!: CoordinateService;
+  private markers: L.Marker[];
+  private lines: L.Polyline[];
+  private router: L.Routing.IRouter;
+  coordinateService: CoordinateService;
 
   constructor(
     coordinateService: CoordinateService,
@@ -27,6 +29,10 @@ export class InteractiveMapComponent implements AfterViewInit {
     this.coordinateService = coordinateService;
     this.markers = [];
     this.lines = [];
+    // TODO - Spin up osrm-backend Docker image, serve API via Flask
+    this.router = new L.Routing.OSRMv1({
+      serviceUrl: `http://router.project-osrm.org/route/v1/`
+    });
   }
 
   ngAfterViewInit(): void {
@@ -67,17 +73,49 @@ export class InteractiveMapComponent implements AfterViewInit {
   }
 
   private addMarker(event: L.LeafletMouseEvent): void {
-    var marker = L.marker(event.latlng, {icon: this.MARKER_ICON});
+    let marker = L.marker(event.latlng, {icon: this.MARKER_ICON});
     this.markers.push(marker);
+    marker.addTo(this.map);
 
     if (this.markers.length > 1) {
-      var polyline = L.polyline([marker.getLatLng(), this.markers[this.markers.length - 2].getLatLng()]);
-      this.lines.push(polyline);
-      polyline.addTo(this.map);
-    }
+      this.router.route([
+        new L.Routing.Waypoint(this.markers[this.markers.length - 2].getLatLng(), `marker_${this.markers.length - 1}`, {}),
+        new L.Routing.Waypoint(marker.getLatLng(), `marker_${this.markers.length}`, {})
+      ], (err, routes) => {
+        if (err) {
+          console.error(err);
 
-    marker.addTo(this.map);
-    this.coordinateService.addPoint(event.latlng.lat, event.latlng.lng);
+          // default to standard polyline on failure
+          const line = new L.Polyline([
+            this.markers[this.markers.length - 2].getLatLng(),
+            marker.getLatLng()
+          ]);
+
+          this.coordinateService.addPoint(marker.getLatLng());
+
+          this.lines.push(line);
+          line.addTo(this.map);
+          return;
+        }
+        let coordinatePairs: L.LatLng[] = [];
+        if (routes) {
+          for (let route of routes) {
+            if (route.coordinates) {
+              for (let i = 1; i < route.coordinates.length; i++) {
+                coordinatePairs.push(route.coordinates[i - 1]);
+                const line = new L.Polyline([
+                  [route.coordinates[i - 1].lat, route.coordinates[i - 1].lng],
+                  [route.coordinates[i].lat, route.coordinates[i].lng]
+                ]);
+                this.lines.push(line);
+                line.addTo(this.map);
+              }
+            }
+          }
+        }
+        this.coordinateService.addPoints(coordinatePairs);
+      });
+    }
   }
 
   clearMarkers() {
@@ -90,6 +128,7 @@ export class InteractiveMapComponent implements AfterViewInit {
       line.remove();
     }
     this.lines = [];
+
     this.coordinateService.clearPoints();
   }
 }

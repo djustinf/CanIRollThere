@@ -1,6 +1,7 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Waypoint } from './waypoint';
+import { LatLng } from 'leaflet';
 import { WaypointUpdate, UpdateType } from './waypoint-update';
 
 @Injectable({
@@ -19,13 +20,29 @@ export class CoordinateService {
     this.points = [];
   }
 
-  addPoint(x: number, y: number): void {
-    this.httpClient.get<string>(this.ELEVATION_API, { params: { lat: x.toString(), lon: y.toString() } })
-      .subscribe((elev: string) => {
-        const point = new Waypoint(x, y, +elev);
-        this.points.push(point);
-        this.waypointEmitter.emit(new WaypointUpdate(UpdateType.ADD, point));
+  addPoint(point: LatLng): void {
+    this.httpClient.get<number>(this.ELEVATION_API, { params: { lat: point.lat.toString(), lng: point.lng.toString() } })
+      .subscribe((elev: number) => {
+        const waypoint = new Waypoint(point.lat, point.lng, elev);
+        this.points.push(waypoint);
+        this.waypointEmitter.emit(new WaypointUpdate(UpdateType.ADD, waypoint));
       });
+  }
+
+  addPoints(points: LatLng[]): void {
+    this.httpClient.post<number[]>(this.ELEVATION_API, {
+      "locations": points
+    }).subscribe((response: number[]) => {
+      if (points.length != response.length) {
+        console.error('Not enough elevation data for coordinates.');
+        return;
+      }
+      for (let i = 0; i < points.length; i++) {
+        const waypoint = new Waypoint(points[i].lat, points[i].lng, response[i]);
+        this.points.push(waypoint);
+        this.waypointEmitter.emit(new WaypointUpdate(UpdateType.ADD, waypoint));
+      }
+    });
   }
 
   getPoints(): Waypoint[] {
