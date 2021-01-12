@@ -1,5 +1,16 @@
 <div id="map">
-    <button id="remove-markers" hidden (click)="clearMarkers()" class="leaflet-top leaflet-right">
-        Remove Markers
-    </button>
+    <div id="options" class="hidden leaflet-top leaflet-right">
+        <form [formGroup]="lineModeForm">
+            <h3>Line Mode</h3>
+            <input id="auto" type="radio" value="0" formControlName="lineMode">
+            <label for="auto">Auto route</label>
+            <input id="snap" type="radio" value="1" formControlName="lineMode">
+            <label for="snap">Snap to road</label>
+            <input id="free" type="radio" value="2" formControlName="lineMode">
+            <label for="free">Freeform</label>
+        </form>
+        <button id="remove-markers" (click)="clearMarkers()">
+            Remove Markers
+        </button>
+    </div>
 </div>

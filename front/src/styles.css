@@ -17,3 +17,7 @@ a {
 .leaflet-control-container .leaflet-routing-container-hide {
     display: none;
 }
+
+.hidden {
+    display: none !important;
+}

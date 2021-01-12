@@ -1,7 +1,20 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { 
+  Component,
+  AfterViewInit
+} from '@angular/core';
+import { 
+  FormBuilder,
+  FormGroup
+} from '@angular/forms';
 import * as L from 'leaflet';
 import 'leaflet-routing-machine';
 import { CoordinateService } from '../coordinate.service';
+
+enum LineMode {
+  AUTO,
+  SNAP,
+  FREEFORM
+}
 
 @Component({
   selector: 'app-interactive-map',
@@ -9,26 +22,35 @@ import { CoordinateService } from '../coordinate.service';
   styleUrls: ['./interactive-map.component.css']
 })
 export class InteractiveMapComponent implements AfterViewInit {
+
   // https://github.com/Asymmetrik/ngx-leaflet/issues/175#issuecomment-406873836
-  readonly MARKER_ICON: L.Icon = L.icon({
+  private MARKER_ICON: L.Icon = L.icon({
     iconSize: [ 25, 41 ],
     iconAnchor: [ 13, 41 ],
     iconUrl: 'leaflet/marker-icon.png',
     shadowUrl: 'leaflet/marker-shadow.png'
   });
+  private MAX_ROUTE_DISTANCE = 5000;
 
   private map!: L.Map;
   private markers: L.Marker[];
   private lines: L.Polyline[];
   private router: L.Routing.IRouter;
+
   coordinateService: CoordinateService;
+  lineModeForm: FormGroup;
 
   constructor(
     coordinateService: CoordinateService,
+    private formBuilder: FormBuilder
   ) {
     this.coordinateService = coordinateService;
     this.markers = [];
     this.lines = [];
+    this.lineModeForm = this.formBuilder.group({
+      lineMode: "0"
+    });
+
     // TODO - Spin up osrm-backend Docker image, serve API via Flask
     this.router = new L.Routing.OSRMv1({
       serviceUrl: `http://router.project-osrm.org/route/v1/`
@@ -39,7 +61,7 @@ export class InteractiveMapComponent implements AfterViewInit {
     navigator.geolocation.getCurrentPosition(this.initMap.bind(this), (e) => {
       console.warn("Failed to get current location.");
       this.initMap();
-    })
+    });
   }
 
   private initMap(position?: Position): void {
@@ -63,59 +85,101 @@ export class InteractiveMapComponent implements AfterViewInit {
 
     tiles.addTo(this.map);
 
-    // prevent button clicks from also clicking map,
-    // and make button visible when map is visible
-    const button = document.getElementById('remove-markers');
-    if (button) {
-      button.removeAttribute('hidden');
-      L.DomEvent.disableClickPropagation(button);
+    // prevent options clicks from also clicking map,
+    // and make options visible when map is visible
+    const optionsDiv = document.getElementById('options');
+    if (optionsDiv) {
+      if (optionsDiv.classList.contains('hidden')) {
+        optionsDiv.classList.remove('hidden');
+      }
+      if (optionsDiv.hasAttribute('hidden')) {
+        optionsDiv.removeAttribute('hidden');
+      }
+      L.DomEvent.disableClickPropagation(optionsDiv);
     }
   }
 
   private addMarker(event: L.LeafletMouseEvent): void {
     let marker = L.marker(event.latlng, {icon: this.MARKER_ICON});
-    this.markers.push(marker);
-    marker.addTo(this.map);
 
-    if (this.markers.length > 1) {
-      this.router.route([
-        new L.Routing.Waypoint(this.markers[this.markers.length - 2].getLatLng(), `marker_${this.markers.length - 1}`, {}),
-        new L.Routing.Waypoint(marker.getLatLng(), `marker_${this.markers.length}`, {})
-      ], (err, routes) => {
-        if (err) {
-          console.error(err);
+    const lineMode = +this.lineModeForm.value.lineMode;
+    if (this.markers.length > 0) {
+      let previousPoint: L.LatLng;
+      if (this.lines.length > 0) {
+        const previousLatLngs = this.lines[this.lines.length - 1].getLatLngs();
+        previousPoint = previousLatLngs[previousLatLngs.length - 1] as L.LatLng;
+      } else {
+        previousPoint = this.markers[this.markers.length - 1].getLatLng();
+      }
 
-          // default to standard polyline on failure
-          const line = new L.Polyline([
-            this.markers[this.markers.length - 2].getLatLng(),
-            marker.getLatLng()
-          ]);
+      if (lineMode === LineMode.FREEFORM) {
+        this.coordinateService.addPoint(marker.getLatLng());
 
-          this.coordinateService.addPoint(marker.getLatLng());
+        const line = new L.Polyline([
+          previousPoint,
+          marker.getLatLng()
+        ]);
+        this.lines.push(line);
+        line.addTo(this.map);
+      } else if (previousPoint.distanceTo(marker.getLatLng()) > this.MAX_ROUTE_DISTANCE) {
+        alert("Please use the current line mode on a shorter distance.");
+        return;
+      } else {
+        this.router.route([
+          new L.Routing.Waypoint(previousPoint, `marker_${this.markers.length - 1}`, {}),
+          new L.Routing.Waypoint(marker.getLatLng(), `marker_${this.markers.length}`, {})
+        ], (err, routes) => {
+          if (err) {
+            console.error(err);
 
-          this.lines.push(line);
-          line.addTo(this.map);
-          return;
-        }
-        let coordinatePairs: L.LatLng[] = [];
-        if (routes) {
-          for (let route of routes) {
-            if (route.coordinates) {
-              for (let i = 1; i < route.coordinates.length; i++) {
-                coordinatePairs.push(route.coordinates[i - 1]);
-                const line = new L.Polyline([
-                  [route.coordinates[i - 1].lat, route.coordinates[i - 1].lng],
-                  [route.coordinates[i].lat, route.coordinates[i].lng]
-                ]);
-                this.lines.push(line);
-                line.addTo(this.map);
+            // default to standard polyline on failure
+            const line = new L.Polyline([
+              previousPoint,
+              marker.getLatLng()
+            ]);
+
+            this.coordinateService.addPoint(marker.getLatLng());
+
+            this.lines.push(line);
+            line.addTo(this.map);
+          } else if (routes) {
+            for (let route of routes) {
+              if (route.coordinates) {
+                if (lineMode === LineMode.SNAP) {
+                  const lastPoint = route.coordinates[route.coordinates.length - 1];
+                  const line = new L.Polyline([
+                    route.coordinates[0],
+                    lastPoint
+                  ]);
+                  this.lines.push(line);
+                  line.addTo(this.map);
+
+                  this.coordinateService.addPoint(lastPoint);
+                } else if (lineMode === LineMode.AUTO) {
+                  let coordinatePairs: L.LatLng[] = [];
+                  for (let i = 1; i < route.coordinates.length; i++) {
+                    const line = new L.Polyline([
+                      route.coordinates[i - 1],
+                      route.coordinates[i]
+                    ]);
+                    this.lines.push(line);
+                    line.addTo(this.map);
+
+                    coordinatePairs.push(route.coordinates[i - 1]);
+                  }
+
+                  this.coordinateService.addPoints(coordinatePairs);
+                }
               }
             }
           }
-        }
-        this.coordinateService.addPoints(coordinatePairs);
-      });
+        });
+      }
     }
+
+    this.markers.push(marker);
+    marker.addTo(this.map);
+    this.coordinateService.addPoint(marker.getLatLng());
   }
 
   clearMarkers() {
