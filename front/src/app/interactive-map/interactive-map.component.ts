@@ -31,6 +31,7 @@ export class InteractiveMapComponent implements AfterViewInit {
     shadowUrl: 'leaflet/marker-shadow.png'
   });
   private MAX_ROUTE_DISTANCE = 5000;
+  private SUBDIVISION_RESOLUTION = 30; // TODO - determine this based on the resolution of elevation data
 
   private map!: L.Map;
   private markers: L.Marker[];
@@ -143,34 +144,42 @@ export class InteractiveMapComponent implements AfterViewInit {
             this.lines.push(line);
             line.addTo(this.map);
           } else if (routes) {
+            let minDistance: number = 0;
+            let minRoute: L.LatLng[] = [];
             for (let route of routes) {
               if (route.coordinates) {
-                if (lineMode === LineMode.SNAP) {
-                  const lastPoint = route.coordinates[route.coordinates.length - 1];
-                  const line = new L.Polyline([
-                    route.coordinates[0],
-                    lastPoint
-                  ]);
-                  this.lines.push(line);
-                  line.addTo(this.map);
-
-                  this.coordinateService.addPoint(lastPoint);
-                } else if (lineMode === LineMode.AUTO) {
-                  let coordinatePairs: L.LatLng[] = [];
-                  for (let i = 1; i < route.coordinates.length; i++) {
-                    const line = new L.Polyline([
-                      route.coordinates[i - 1],
-                      route.coordinates[i]
-                    ]);
-                    this.lines.push(line);
-                    line.addTo(this.map);
-
-                    coordinatePairs.push(route.coordinates[i - 1]);
-                  }
-
-                  this.coordinateService.addPoints(coordinatePairs);
+                let newDistance = this.getRouteLength(route.coordinates);
+                if (!minRoute.length || newDistance < minDistance) {
+                  minRoute = route.coordinates;
+                  minDistance = newDistance;
                 }
               }
+            }
+            const subdivided: L.LatLng[] = this.subdivide(minRoute, this.SUBDIVISION_RESOLUTION);
+            if (lineMode === LineMode.SNAP) {
+              const lastPoint = subdivided[subdivided.length - 1];
+              const line = new L.Polyline([
+                subdivided[0],
+                lastPoint
+              ]);
+              this.lines.push(line);
+              line.addTo(this.map);
+
+              this.coordinateService.addPoint(lastPoint);
+            } else if (lineMode === LineMode.AUTO) {
+              let coordinatePairs: L.LatLng[] = [];
+              for (let i = 0; i < subdivided.length - 1; i++) {
+                const line = new L.Polyline([
+                  subdivided[i],
+                  subdivided[i + 1]
+                ]);
+                this.lines.push(line);
+                line.addTo(this.map);
+
+                coordinatePairs.push(subdivided[i]);
+              }
+
+              this.coordinateService.addPoints(coordinatePairs);
             }
           }
         });
@@ -179,7 +188,6 @@ export class InteractiveMapComponent implements AfterViewInit {
 
     this.markers.push(marker);
     marker.addTo(this.map);
-    this.coordinateService.addPoint(marker.getLatLng());
   }
 
   clearMarkers() {
@@ -194,5 +202,44 @@ export class InteractiveMapComponent implements AfterViewInit {
     this.lines = [];
 
     this.coordinateService.clearPoints();
+  }
+
+  getRouteLength(coordinates: L.LatLng[]) {
+    let totalDistance = 0;
+    for (let i = 0; i < coordinates.length - 1; i++) {
+      totalDistance += coordinates[i].distanceTo(coordinates[i + 1]);
+    }
+    return totalDistance;
+  }
+
+  subdivide(coordinates: L.LatLng[], resolution: number): L.LatLng[] {
+    let subdivided = [coordinates[0]]; // add starting point
+
+    for (let i = 0; i < coordinates.length - 1; i++) {
+      let current: L.LatLng = coordinates[i];
+      let next: L.LatLng = coordinates[i + 1];
+
+      let dist = current.distanceTo(next);
+      while (dist > resolution) {
+        let fractionOfDist = resolution / dist;
+        let deltaLat = next.lat - current.lat;
+        let deltaLng = next.lng - current.lng;
+
+        // move by at most "resolution", then add new point
+        current = new L.LatLng(current.lat + fractionOfDist * deltaLat, current.lng + fractionOfDist * deltaLng);
+        subdivided.push(current);
+        dist = current.distanceTo(next);
+      }
+
+      subdivided.push(next); // add next starting point
+    }
+
+    // remove redundant points
+    return subdivided.filter((coordinate, index) => {
+      if (index > 0) {
+        return coordinate.distanceTo(subdivided[index - 1]) > 0;
+      }
+      return true;
+    });
   }
 }
