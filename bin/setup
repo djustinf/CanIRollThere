@@ -17,13 +17,38 @@ fi
 if command -v docker &> /dev/null;
 then
    echo "found docker"
+
    echo "pulling openelevation/open-elevation image"
-   docker pull openelevation/open-elevation
-   echo "starting openelevation/open-elevation with '$(pwd)/data' directory"
-   docker run -d -t -i -v $DATA_DIR:/code/data -p 8080:8080 openelevation/open-elevation
-   echo "started container at http://localhost:8080"
+   docker pull openelevation/open-elevation &> /dev/null
+   if [ $? -ne 0 ];
+   then
+      echo "failed to pull down openelevation/open-elevation image"
+      exit
+   fi
+
+   echo "checking if openelevation/open-elevation is running"
+   CONTAINER_INFO=($(docker container ls | grep "openelevation/open-elevation"))
+   if [ $? == 0 ];
+   then
+      echo "found running container, killing ${CONTAINER_INFO[0]}"
+      docker kill ${CONTAINER_INFO[0]} &> /dev/null
+      if [ $? -ne 0 ];
+      then
+         echo "could not kill the container"
+         exit
+      fi
+   fi
+
+   echo "starting openelevation/open-elevation with '$DATA_DIR' directory"
+   docker run -d -t -i -v $DATA_DIR:/code/data -p 8080:8080 openelevation/open-elevation &> /dev/null
+   if [ $? == 0 ];
+   then
+      echo "started container at http://localhost:8080"
+   else
+      echo "something went wrong while starting the container"
+      exit
+   fi
 else
    echo "could not find docker, please install"
    exit
 fi
-
