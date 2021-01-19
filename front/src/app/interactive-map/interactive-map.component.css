@@ -13,13 +13,13 @@ div#options {
     padding: 5px;
 }
 
-div#options button, div#options input {
+div#options button, div#options mat-radio-button {
     pointer-events: auto;
+    margin: 5px;
 }
 
 button {
-    width: 200px;
-    height: 20px;
+    margin: 5px;
 }
 
 h3 {

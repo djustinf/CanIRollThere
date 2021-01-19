@@ -1,11 +1,15 @@
 <app-top-bar></app-top-bar>
 
-<div class="flex-container">
-    <app-interactive-map></app-interactive-map>
-    <div class="flex-column">
+<mat-grid-list id="bodyGrid" cols="2" rows="2" rowHeight="fit">
+    <mat-grid-tile rowspan="2">
+        <app-interactive-map></app-interactive-map>
+    </mat-grid-tile>
+    <mat-grid-tile>
         <app-difficulty></app-difficulty>
+    </mat-grid-tile>
+    <mat-grid-tile>
         <app-topo-graph></app-topo-graph>
-    </div>
-</div>
+    </mat-grid-tile>
+</mat-grid-list>
 
 <app-bottom-bar></app-bottom-bar>

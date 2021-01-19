@@ -39,7 +39,7 @@ export class InteractiveMapComponent implements AfterViewInit {
   private router: L.Routing.IRouter;
 
   coordinateService: CoordinateService;
-  lineModeForm: FormGroup;
+  lineMode: string;
 
   constructor(
     coordinateService: CoordinateService,
@@ -48,9 +48,7 @@ export class InteractiveMapComponent implements AfterViewInit {
     this.coordinateService = coordinateService;
     this.markers = [];
     this.lines = [];
-    this.lineModeForm = this.formBuilder.group({
-      lineMode: "0"
-    });
+    this.lineMode = '0';
 
     // TODO - Spin up osrm-backend Docker image, serve API via Flask
     this.router = new L.Routing.OSRMv1({
@@ -103,7 +101,7 @@ export class InteractiveMapComponent implements AfterViewInit {
   private addMarker(event: L.LeafletMouseEvent): void {
     let marker = L.marker(event.latlng, {icon: this.MARKER_ICON});
 
-    const lineMode = +this.lineModeForm.value.lineMode;
+    const lineMode = +this.lineMode;
     if (this.markers.length > 0) {
       let previousPoint: L.LatLng;
       if (this.lines.length > 0) {

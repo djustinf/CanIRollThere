@@ -1,15 +1,13 @@
 <div id="map">
     <div id="options" class="hidden leaflet-top leaflet-right">
-        <form [formGroup]="lineModeForm">
-            <h3>Line Mode</h3>
-            <input id="auto" type="radio" value="0" formControlName="lineMode">
-            <label for="auto">Auto route</label>
-            <input id="snap" type="radio" value="1" formControlName="lineMode">
-            <label for="snap">Snap to road</label>
-            <input id="free" type="radio" value="2" formControlName="lineMode">
-            <label for="free">Freeform</label>
-        </form>
-        <button id="remove-markers" (click)="clearMarkers()">
+        <h3>Line Mode</h3>
+        <mat-radio-group aria-label="Line Mode" [(ngModel)]="lineMode">
+            <mat-radio-button id="auto" value="0">Auto route</mat-radio-button>
+            <mat-radio-button id="snap" value="1">Snap to road</mat-radio-button>
+            <mat-radio-button id="free" value="2">Freeform</mat-radio-button>
+        </mat-radio-group>
+
+        <button mat-raised-button color="primary" id="remove-markers" (click)="clearMarkers()">
             Remove Markers
         </button>
     </div>

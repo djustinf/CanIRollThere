@@ -1,61 +1,33 @@
-div.flex-container {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-
-    width: 100vw;
-    height: 90vh;
-}
-
-div.flex-column {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: space-between;
-
-    width: 50%;
-    height: 100%
-}
-
 app-interactive-map {
-    width: 50%;
+    width: 100%;
     height: 100%;
 }
 
 app-difficulty {
     width: 100%;
-    height: 33%;
+    height: 100%;
     padding: 10px;
 }
 
 app-topo-graph {
     width: 100%;
-    height: 33%;
+    height: 100%;
     padding: 10px;
 }
 
-app-top-bar {
-    height: 5vh;
-    width: 100vw;
-    padding-left: 10px;
-
-    background-color: black;
-
-    display: flex;
-    align-items: center;
+app-bottom-bar {
+    height: var(--bar-thickness);
+    width: 100%;
+    display: inline-block;
 }
 
-app-bottom-bar {
-    height: 5vh;
-    width: 100vw;
-    padding-left: 10px;
+app-top-bar {
+    height: var(--bar-thickness);
+    width: 100%;
+    display: inline-block;
+}
 
-    background-color: black;
-
-    position: fixed;
-    left: 0;
-    bottom: 0;
-
-    display: flex;
-    align-items: center;
+#bodyGrid {
+    height: calc(100% - 2 * var(--bar-thickness));
+    width: 100%;
 }
