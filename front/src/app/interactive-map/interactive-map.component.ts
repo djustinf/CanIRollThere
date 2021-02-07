@@ -202,6 +202,10 @@ export class InteractiveMapComponent implements AfterViewInit {
     this.coordinateService.clearPoints();
   }
 
+  saveRoute() {
+    this.coordinateService.savePoints();
+  }
+
   getRouteLength(coordinates: L.LatLng[]) {
     let totalDistance = 0;
     for (let i = 0; i < coordinates.length - 1; i++) {

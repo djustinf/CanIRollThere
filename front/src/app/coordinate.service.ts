@@ -9,7 +9,9 @@ import { WaypointUpdate, UpdateType } from './waypoint-update';
 })
 export class CoordinateService {
   // TODO: Move to a better pattern once we have more API calls and this is being hosted
-  private ELEVATION_API = 'http://localhost:5000/elevation';
+  private BASE_URL = 'http://localhost:5000';
+  private ELEVATION_API = this.BASE_URL + '/elevation';
+  private SAVE_API = this.BASE_URL + '/save';
   private points: Waypoint[];
 
   waypointEmitter: EventEmitter<WaypointUpdate> = new EventEmitter<WaypointUpdate>();
@@ -52,5 +54,13 @@ export class CoordinateService {
   clearPoints(): void {
     this.points = [];
     this.waypointEmitter.emit(new WaypointUpdate(UpdateType.CLEAR));
+  }
+
+  savePoints(): void {
+    this.httpClient.post<{route_id: string}>(this.SAVE_API, {
+      "locations": this.points
+    }).subscribe((response: {route_id: string}) => {
+      console.log(`Saved route! ${response.route_id}`);
+    });
   }
 }

@@ -1,5 +1,12 @@
 # CanIRollThere
 
+## Setup
+* Install MongoDB Community Edition: https://docs.mongodb.com/manual/administration/install-community/
+* Install Docker: https://docs.docker.com/get-docker/
+* Create an OpenTopography account, download elevation data, load into `data/`: https://opentopography.org/
+  * SRTM 30m data: https://portal.opentopography.org/raster?opentopoID=OTSRTM.082015.4326.1
+  * SRTM 90m data: https://portal.opentopography.org/raster?opentopoID=OTSRTM.042013.4326.1
+
 ## Commands
 * ```source bin/init``` to setup virtualenv and a few other goodies
 * ```make setup``` to pull Open-Elevation docker image and run it in the background

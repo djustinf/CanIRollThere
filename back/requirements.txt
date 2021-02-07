@@ -1,6 +1,7 @@
 # Version-specific #
 requests==2.25.1
 jsonschema==3.2.0
+mongoengine==0.22.1
 
 # Wild wild west #
 flask
