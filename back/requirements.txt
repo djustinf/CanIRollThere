@@ -5,3 +5,6 @@ mongoengine==0.22.1
 
 # Wild wild west #
 flask
+pyopenssl
+flask-jwt
+bcrypt

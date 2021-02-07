@@ -11,7 +11,7 @@ export class CoordinateService {
   // TODO: Move to a better pattern once we have more API calls and this is being hosted
   private BASE_URL = 'http://localhost:5000';
   private ELEVATION_API = this.BASE_URL + '/elevation';
-  private SAVE_API = this.BASE_URL + '/save';
+  private SAVE_API = this.BASE_URL + '/route/save';
   private points: Waypoint[];
 
   waypointEmitter: EventEmitter<WaypointUpdate> = new EventEmitter<WaypointUpdate>();

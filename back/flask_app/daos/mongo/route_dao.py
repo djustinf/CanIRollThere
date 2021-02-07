@@ -1,17 +1,10 @@
-from typing import List, Tuple
-from mongoengine import connect, Document
-from mongoengine.fields import UUIDField, MultiPointField
-from uuid import uuid4
 import logging
 
-class Route(Document):
-    route_id = UUIDField(primary_key=True)
-    locations = MultiPointField()
+from typing import List, Tuple
+from uuid import uuid4
+from ...models.route import Route
 
-class MongoDBDao():
-    def __init__(self):
-        connect('canirollthere')
-
+class RouteDao():
     def save_route(self, locations: List[Tuple[float, float]]):
         return Route(route_id=uuid4(), locations=locations).save()
 
